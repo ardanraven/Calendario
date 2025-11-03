@@ -17,7 +17,17 @@
             font-family: 'Inter', sans-serif;
             background-color: #111827; /* bg-gray-900 */
             color: #F3F4F6; /* bg-gray-100 */
+            /* Garante que o padding não cause scroll horizontal */
+            padding: 0.5rem; 
         }
+        
+        /* Ajuste no body para telas pequenas */
+        @media (min-width: 640px) {
+            body {
+                padding: 2rem; /* p-8 */
+            }
+        }
+
 
         .calendar-grid {
             display: grid;
@@ -32,7 +42,8 @@
         .day-cell {
             background-color: #1F2937; /* bg-gray-800 */
             min-height: 100px; /* Altura mínima para células */
-            padding: 0.5rem;
+            /* MUDANÇA: Padding reduzido para mobile */
+            padding: 0.25rem; /* p-1 */
             transition: all 0.2s ease-in-out;
             display: flex;
             flex-direction: column;
@@ -43,6 +54,8 @@
         @media (min-width: 640px) {
             .day-cell {
                 min-height: 140px;
+                /* MUDANÇA: Padding restaurado para telas maiores */
+                padding: 0.5rem; /* p-2 */
             }
         }
 
@@ -62,10 +75,11 @@
         }
         
         .moon-emoji {
-            font-size: 2rem; /* text-3xl */
+            /* MUDANÇA: Tamanho e margens reduzidos */
+            font-size: 1.5rem; /* text-2xl */
             text-align: center;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
+            margin-top: 0.25rem; /* mt-1 */
+            margin-bottom: 0.25rem; /* mb-1 */
         }
         
         .ritual-marker {
@@ -80,7 +94,8 @@
         
         /* NOVO: Estilo para os festivais (lista) */
         .festival-marker {
-            font-size: 0.70rem; /* text-xs, mas um pouco menor */
+             /* MUDANÇA: Fonte um tiquinho menor */
+            font-size: 0.65rem; /* ~10.4px */
             font-weight: 500;
             color: #d1d5db; /* text-gray-300 */
             line-height: 1.2;
@@ -148,7 +163,8 @@
         
         /* NOVO: Estilo para o marcador de ritual antigo (agora só Hekate) */
         .hekate-marker {
-            font-size: 0.75rem; /* text-xs */
+            /* MUDANÇA: Fonte um tiquinho menor */
+            font-size: 0.7rem; /* ~11.2px */
             font-weight: 700;
             padding: 2px 4px;
             border-radius: 4px;
@@ -160,7 +176,7 @@
         }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="p-2 sm:p-8"> <!-- Padding base menor -->
 
     <div class="max-w-7xl mx-auto">
         
