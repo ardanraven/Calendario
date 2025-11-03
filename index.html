@@ -1,1 +1,609 @@
-teste
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário Lunar Místico</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos customizados */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #F3F4F6; /* bg-gray-100 */
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 1px; /* Cria um efeito de borda fina */
+            background-color: #374151; /* bg-gray-700 */
+            border: 1px solid #374151; /* bg-gray-700 */
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .day-cell {
+            background-color: #1F2937; /* bg-gray-800 */
+            min-height: 100px; /* Altura mínima para células */
+            padding: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Responsivo para telas menores */
+        @media (min-width: 640px) {
+            .day-cell {
+                min-height: 140px;
+            }
+        }
+
+        .day-cell.other-month {
+            background-color: #374151; /* bg-gray-700 */
+            opacity: 0.6;
+        }
+        
+        .day-cell.today {
+            background-color: #4B5563; /* bg-gray-600 */
+            border: 2px solid #60A5FA; /* border-blue-400 */
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 0.875rem; /* text-sm */
+        }
+        
+        .moon-emoji {
+            font-size: 2rem; /* text-3xl */
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ritual-marker {
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 700;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* NOVO: Estilo para os festivais (lista) */
+        .festival-marker {
+            font-size: 0.70rem; /* text-xs, mas um pouco menor */
+            font-weight: 500;
+            color: #d1d5db; /* text-gray-300 */
+            line-height: 1.2;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        
+        /* NOVO: Item individual do festival */
+        .festival-item {
+            margin-top: 2px;
+        }
+        
+        /* Primeiro item (data ática) um pouco mais destacado */
+        .festival-item:first-child {
+            font-weight: 600;
+            color: #a5f3fc; /* text-cyan-200 */
+        }
+
+
+        /* --- Loader e Erro (REMOVIDOS) --- */
+        
+        /* --- Dias de Ritual --- */
+        
+        /* Deipnon (Vermelho) */
+        .day-cell.deipnon {
+            background-color: #450a0a; /* Fundo vermelho escuro */
+            border: 1px solid #dc2626; /* Borda vermelha */
+        }
+        .deipnon .festival-marker { /* MUDANÇA: Afeta o texto do festival */
+            color: #fecaca; /* text-red-200 */
+            font-weight: 600;
+        }
+        .deipnon .festival-item:first-child { /* Data ática no deipnon */
+             color: #fda4af; /* text-rose-300 */
+        }
+        
+        /* Noumenia (Azul) */
+        .day-cell.noumenia {
+            background-color: #1e3a8a; /* Fundo azul escuro */
+            border: 1px solid #3b82f6; /* Borda azul */
+        }
+        .noumenia .festival-marker { /* MUDANÇA: Afeta o texto do festival */
+            color: #bfdbfe; /* text-blue-200 */
+            font-weight: 600;
+        }
+        .noumenia .festival-item:first-child { /* Data ática na noumenia */
+             color: #93c5fd; /* text-blue-300 */
+        }
+        
+        /* Lua Cheia (Âmbar/Dourado) */
+        .day-cell.full-moon {
+            background-color: #78350f; /* Fundo laranja/dourado escuro */
+            border: 1px solid #f59e0b; /* Borda ambar */
+        }
+        .full-moon .festival-item:first-child { /* Data ática na lua cheia */
+             color: #fcd34d; /* text-amber-300 */
+        }
+        
+        
+        /* Dia de Hekate - Seg/Sáb (Índigo/Roxo) */
+        .day-cell.hekate-day {
+            background-color: #312e81; /* Fundo indigo escuro */
+            border: 1px solid #6366f1; /* Borda indigo */
+        }
+        
+        /* NOVO: Estilo para o marcador de ritual antigo (agora só Hekate) */
+        .hekate-marker {
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 700;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            background-color: #6366f1; /* bg-indigo-500 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Cabeçalho -->
+        <header class="mb-6">
+            <h1 class="text-2xl sm:text-4xl font-bold text-white text-center">
+                Calendário Lunar Místico <span class="opacity-80">🌙</span>
+            </h1>
+            
+            <!-- MUDANÇA: Display da Lua Atual REVERTIDO para EMOJI -->
+            <div id="current-moon-display" class="text-center my-6 py-6 bg-gray-800 rounded-lg shadow-inner flex flex-col justify-center items-center">
+                <!-- Emoji da lua atual (fallback) -->
+                <div id="current-moon-emoji" class="text-7xl sm:text-8xl"></div> 
+                <div id="current-moon-name" class="text-lg sm:text-xl text-amber-400 font-semibold mt-4"></div>
+            </div>
+            
+            <!-- Navegação do Calendário -->
+            <div class="flex justify-between items-center">
+                <button id="prev-month" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg shadow transition-colors">&lt;</button>
+                <h2 id="month-year" class="text-xl sm:text-2xl font-semibold w-40 sm:w-56 text-center"></h2>
+                <button id="next-month" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg shadow transition-colors">&gt;</button>
+            </div>
+        </header>
+
+        <!-- Nomes dos Dias da Semana -->
+        <div class="grid grid-cols-7 gap-1 mb-1">
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Dom</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Seg</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Ter</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Qua</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Qui</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Sex</div>
+            <div class="text-center font-bold text-gray-400 text-xs sm:text-sm uppercase py-2">Sáb</div>
+        </div>
+
+        <!-- Grade do Calendário (sem loader) -->
+        <div id="calendar-container" class="relative">
+            <!-- Loader e Error Box REMOVIDOS -->
+            
+            <!-- CORREÇÃO: Adicionado o ID que faltava -->
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Células do dia serão injetadas aqui pelo JS -->
+            </div>
+        </div>
+        
+        <!-- Legenda de Cores -->
+        <footer class="mt-6 p-4 bg-gray-800 rounded-lg shadow">
+            <h3 class="font-bold text-lg mb-3 text-white">Legenda das Cores:</h3>
+            <div class="flex flex-wrap gap-x-6 gap-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded" style="background-color: #dc2626;"></div>
+                    <span class="text-sm">Deipnon (Véspera da Lua Nova)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded" style="background-color: #3b82f6;"></div>
+                    <span class="text-sm">Noumenia (Dia da Lua Nova)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded" style="background-color: #f59e0b;"></div>
+                    <span class="text-sm">Lua Cheia</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded" style="background-color: #6366f1;"></div>
+                    <span class="text-sm">Dia de Hekate (Segunda / Sábado)</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- NOVO: Legenda Detalhada dos Rituais -->
+        <footer class="mt-6 p-4 bg-gray-800 rounded-lg shadow">
+            <h3 class="font-bold text-lg mb-3 text-white">Legenda dos Dias Sagrados (Hellenion)</h3>
+            <div class="space-y-3 text-sm text-gray-300">
+                <p><strong>Maimakterion:</strong> O quinto mês do calendário Ático (de Atenas), alinhado com Novembro, dedicado a Zeus Maimaktes ("Tempestuoso").</p>
+                <p><strong>Poseideon:</strong> O sexto mês do calendário Ático, alinhado com Dezembro, com festivais em honra a Poseidon.</p>
+                <p><strong>Libação para Ares:</strong> Um dia de devoção mensal ao deus Ares.</p>
+                <p><strong>Deipnon de Hekate:</strong> O "Jantar de Hekate". A noite de escuridão total, no último dia do mês lunar (véspera da Lua Nova), quando oferendas são deixadas em encruzilhadas para Hekate.</p>
+                <p><strong>Noumenia:</strong> O primeiro dia do mês lunar (dia da Lua Nova visível). Um dia sagrado de novos começos, dedicado a todos os deuses, especialmente Selene, Apollon e Hestia.</p>
+                <p><strong>Agathos Daimon:</strong> O segundo dia do mês, dedicado ao "Bom Espírito", um espírito guardião pessoal e da casa. É comum fazer uma libação de vinho puro.</p>
+                <p><strong>Dia de Athena:</strong> O terceiro dia do mês, tradicionalmente sagrado para Athena.</p>
+                <p><strong>Dia de Afrodite, Herakles, Hermes e Eros:</strong> O quarto dia do mês, sagrado para este grupo de deuses.</p>
+                <p><strong>Dia de Artemis:</strong> O sexto dia do mês, sagrado para Artemis.</p>
+                <p><strong>Dia de Apollon:</strong> O sétimo dia do mês, sagrado para Apollon.</p>
+                <p><strong>Dia de Poseidon e Teseu:</strong> O oitavo dia do mês, sagrado para Poseidon e para o herói Teseu.</p>
+                <p><strong>Dia de Helios, Musas e Rhea:</strong> O nono dia do mês, dedicado a Helios (Sol), às Musas (inspiração) e a Rhea (mãe dos deuses).</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script type="module">
+        // --- LÓGICA DO CALENDÁRIO E FASES DA LUA ---
+        
+        // ==========================================================
+        // !! Chaves da API REMOVIDAS !!
+        // A chamada da API estava falhando (CORS) e foi removida 
+        // para corrigir o erro 'Failed to fetch'.
+        // ==========================================================
+        // const API_KEY = '...'; 
+        // const API_SECRET = '...';
+        // ==========================================================
+
+        let currentDate = new Date();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normaliza 'hoje' para meia-noite
+        // const todayYYYYMMDD = today.toISOString().split('T')[0]; // Não é mais necessário
+
+        const calendarGrid = document.getElementById('calendar-grid');
+        const monthYearHeader = document.getElementById('month-year');
+        const prevButton = document.getElementById('prev-month');
+        const nextButton = document.getElementById('next-month');
+        
+        // Cache da imagem REMOVIDO
+        // let imageCache = new Map();
+
+        // Elementos de UI
+        // Loader e ErrorBox REMOVIDOS
+        // const loader = document.getElementById('loader');
+        // const errorBox = document.getElementById('error-box');
+        
+        // Elementos da lua atual (imagem/loader) REMOVIDOS
+        // const currentMoonLoader = document.getElementById('current-moon-loader');
+        // const currentMoonImage = document.getElementById('current-moon-image');
+        const currentMoonName = document.getElementById('current-moon-name');
+        const currentMoonDisplay = document.getElementById('current-moon-display');
+
+        // Emojis e Nomes das 8 fases
+        const MOON_EMOJI = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+        const MOON_NAMES_PT = [
+            'Lua Nova', 
+            'Lua Crescente', 
+            'Quarto Crescente', 
+            'Gibosa Crescente', 
+            'Lua Cheia', 
+            'Gibosa Minguante', 
+            'Quarto Minguante', 
+            'Lua Minguante' // (Waning Crescent)
+        ];
+
+        
+        /**
+         * Função pura para calcular o índice da fase da lua (0-7).
+         * Usada APENAS para os emojis do calendário.
+         */
+        function calculateMoonPhaseIndex(date) {
+            // Cria uma data UTC baseada nos componentes da data local
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            
+            const day = utcDate.getUTCDate();
+            let month = utcDate.getUTCMonth() + 1;
+            let year = utcDate.getUTCFullYear();
+            
+            let c = 0, e = 0, jd = 0, b = 0;
+
+            if (month < 3) {
+                year--;
+                month += 12;
+            }
+            ++month;
+
+            // Cálculo do Dia Juliano
+            c = 365.25 * year;
+            e = 30.6 * month;
+            jd = c + e + day - 694039.09; // Dia Juliano de 01/01/2000
+            
+            // Divide pelo período sinódico da Lua
+            jd /= 29.5305882; 
+            b = parseInt(jd); // Remove a parte inteira
+            jd -= b; // Pega a fração (0 a 1), que é a fase
+
+            // Normaliza jd para positivo se for negativo
+            if (jd < 0) {
+                jd += 1;
+            }
+            
+            // Mapeia a fase (0-1) para um índice de 8 fases (0-7)
+            return Math.round(jd * 8) % 8;
+        }
+
+        /**
+         * Calcula a informação da fase da lua para uma data específica.
+         * MUDANÇA: Usa o cálculo local para TUDO (emoji e rituais).
+         */
+        function getMoonPhaseInfo(date) { 
+            
+            // Checa o dia da semana (0=Dom, 1=Seg, 6=Sab)
+            const dayOfWeek = date.getDay(); // Usa a data local
+
+            // Pega o índice da fase da lua usando a nova função pura (para o emoji)
+            const phaseIndex = calculateMoonPhaseIndex(date);
+            
+            // Dias de Hekate (Seg/Sab)
+            const isHekateDay = (dayOfWeek === 1 || dayOfWeek === 6);
+
+            return {
+                index: phaseIndex,
+                emoji: MOON_EMOJI[phaseIndex],
+                name: MOON_NAMES_PT[phaseIndex],
+                isHekateDay // Único ritual que ele ainda calcula
+            };
+        }
+
+        // checkApiKeys() REMOVIDA
+        // fetchCurrentMoonImage() REMOVIDA
+
+
+        /**
+         * NOVO: Banco de dados de festivais como função (para Nov 2025)
+         * Baseado na lista fornecida pelo usuário. (Traduzido)
+         * MUDANÇA: Agora calcula o dia ático para TODOS os dias.
+         */
+        function getHellenicEvents(date) {
+            const events = [];
+            const day = date.getDate();
+            const month = date.getMonth(); // 0 = Jan, 10 = Nov
+            const year = date.getFullYear();
+
+            // Só se aplica a Novembro de 2025
+            if (month !== 10 || year !== 2025) { 
+                return events;
+            }
+            
+            // 1. Associações do Mês (Geral)
+            if (day >= 1 && day <= 21) {
+                // Maimakterion começa no dia 10 (no dia 1º de Nov)
+                const maimakterionDay = day + 9; 
+                events.push(`${maimakterionDay} Maimakterion`);
+            } else if (day >= 22 && day <= 30) {
+                // Poseideon começa no dia 1 (no dia 22 de Nov)
+                const poseideonDay = day - 21; 
+                events.push(`${poseideonDay} Poseideon`);
+            }
+
+            // 2. Eventos Específicos (Traduzidos da sua lista)
+            switch(day) {
+                // case 1: (já coberto pelo cálculo acima)
+                case 8: 
+                    events.push("Libação para Ares"); 
+                    break;
+                case 21: 
+                    events.push("Deipnon de Hekate"); 
+                    break;
+                case 22: 
+                    events.push("Noumenia (Lua Nova)"); 
+                    break;
+                case 23: 
+                    events.push("Agathos Daimon"); 
+                    break;
+                case 24: 
+                    events.push("Dia de Athena"); 
+                    break;
+                case 25: 
+                    events.push("Dia de Afrodite, Herakles, Hermes e Eros"); 
+                    break;
+                case 27: 
+                    events.push("Dia de Artemis"); 
+                    break;
+                case 28: 
+                    events.push("Dia de Apollon"); 
+                    break;
+                case 29: 
+                    events.push("Dia de Poseidon e Teseu"); 
+                    break;
+                case 30: 
+                    events.push("Dia de Helios, Musas e Rhea"); 
+                    break;
+            }
+
+            return events;
+        }
+
+        /**
+         * Renderiza o calendário para o mês em `currentDate`.
+         */
+        function renderCalendar() {
+            // Limpa o calendário antigo
+            calendarGrid.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth(); // 0-11
+
+            // Atualiza o cabeçalho
+            monthYearHeader.textContent = `${currentDate.toLocaleString('pt-BR', { month: 'long' })} ${year}`.replace(/^\w/, c => c.toUpperCase());
+           
+            // Encontra o primeiro dia do mês e o último
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+
+            // Encontra o dia da semana do primeiro dia (0=Dom, 1=Seg...)
+            const startDayOfWeek = firstDayOfMonth.getDay();
+
+            // Calcula quantos dias do mês anterior precisamos mostrar
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            const prevMonthStartDate = daysInPrevMonth - startDayOfWeek + 1;
+
+            // Loop para preencher os 42 dias (6 semanas)
+            for (let i = 0; i < 42; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell');
+                
+                let dayNumber;
+                let date;
+                let isCurrentMonth = false;
+
+                if (i < startDayOfWeek) {
+                    // --- Dias do Mês Anterior ---
+                    dayNumber = prevMonthStartDate + i;
+                    date = new Date(year, month - 1, dayNumber);
+                    dayCell.classList.add('other-month');
+                } else if (i >= startDayOfWeek + lastDayOfMonth.getDate()) {
+                    // --- Dias do Próximo Mês ---
+                    dayNumber = i - startDayOfWeek - lastDayOfMonth.getDate() + 1;
+                    date = new Date(year, month + 1, dayNumber);
+                    dayCell.classList.add('other-month');
+                } else {
+                    // --- Dias do Mês Atual ---
+                    dayNumber = i - startDayOfWeek + 1;
+                    date = new Date(year, month, dayNumber);
+                    isCurrentMonth = true;
+                }
+                
+                // Normaliza a data para meia-note
+                date.setHours(0, 0, 0, 0);
+
+                // Pega as informações da Lua (AGORA 100% LOCAL)
+                const moonInfo = getMoonPhaseInfo(date);
+                
+                // NOVO: Pega as informações do festival helênico (da nova função)
+                const festivalEvents = getHellenicEvents(date); 
+
+                // Adiciona o número do dia e o emoji da lua
+                dayCell.innerHTML = `
+                    <div class="day-number">${dayNumber}</div>
+                    <div class="moon-emoji" title="${moonInfo.name}">${moonInfo.emoji}</div>
+                    <div class="ritual-markers"></div> <!-- Container para marcadores de hekate -->
+                    <div class="festival-marker"></div> <!-- NOVO: Container para festivais -->
+                `;
+                
+                const hekateMarkerContainer = dayCell.querySelector('.ritual-markers');
+                const festivalMarkerContainer = dayCell.querySelector('.festival-marker');
+                
+                // Adiciona marcadores de ritual
+                
+                let hasSpecialRitual = false; // Flag para não duplicar
+
+                // NOVO: Adiciona a LISTA de festivais
+                if (festivalEvents.length > 0) {
+                    let festivalHTML = '';
+                    let lowerInfo = ''; // String para checar palavras-chave
+                    
+                    for (const event of festivalEvents) {
+                        // Cria um item para cada evento
+                        festivalHTML += `<div class="festival-item">${event}</div>`; 
+                        lowerInfo += event.toLowerCase() + ' '; // Concatena para checagem
+                    }
+                    
+                    festivalMarkerContainer.innerHTML = festivalHTML;
+                    
+                    // Checa por palavras-chave para colorir o dia
+                    if (lowerInfo.includes('deipnon')) {
+                        dayCell.classList.add('deipnon');
+                        hasSpecialRitual = true;
+                    } else if (lowerInfo.includes('noumenia')) {
+                        dayCell.classList.add('noumenia');
+                        hasSpecialRitual = true;
+                    }
+                }
+                
+                // MUDANÇA: Colore a Lua Cheia baseado no emoji (índice 4)
+                // Se não for um ritual de Deipnon ou Noumenia
+                if (moonInfo.index === 4 && !hasSpecialRitual) { 
+                     dayCell.classList.add('full-moon');
+                     hasSpecialRitual = true;
+                }
+
+                // Só marca Seg/Sab se NÃO for um dos rituais acima
+                if (moonInfo.isHekateDay && !hasSpecialRitual) {
+                    dayCell.classList.add('hekate-day');
+                    const marker = document.createElement('div');
+                    marker.className = 'hekate-marker'; // MUDANÇA: Classe específica
+                    marker.textContent = 'Dia de Hekate';
+                    hekateMarkerContainer.appendChild(marker);
+                }
+
+                // Destaca o dia de hoje
+                if (date.getTime() === today.getTime()) {
+                    dayCell.classList.add('today');
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        // --- Inicialização e Eventos ---
+        
+        prevButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(); // Isso agora chama a função síncrona
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(); // Isso agora chama a função síncrona
+        });
+        
+        /**
+         * MUDANÇA: Define a lua atual no cabeçalho.
+         * Revertido para usar emoji local, pois a API falhou.
+         */
+        function setInitialMoon() {
+            // Pega o nome da fase localmente (rápido)
+            const todayInfo = getMoonPhaseInfo(today); 
+            currentMoonName.textContent = `Fase Atual: ${todayInfo.name}`;
+
+            // Tenta buscar a imagem da API
+            // const imageUrl = await fetchCurrentMoonImage();
+            
+            // currentMoonLoader.classList.add('hidden'); // Esconde o loader de texto
+
+            // REVERTIDO: Mostra o emoji local
+            const currentMoonEmoji = document.getElementById('current-moon-emoji');
+            if (currentMoonEmoji) {
+                currentMoonEmoji.textContent = todayInfo.emoji;
+            } else {
+                // Fallback se o emoji div não estiver lá (embora devesse estar)
+                const emojiDiv = document.createElement('div');
+                emojiDiv.className = 'text-7xl sm:text-8xl'; // Fallback para emoji grande
+                emojiDiv.textContent = todayInfo.emoji;
+                currentMoonDisplay.prepend(emojiDiv); 
+            }
+        }
+
+        // --- INICIALIZAÇÃO ---
+        // Renderiza o calendário e a lua atual (com imagem) na primeira carga
+        
+        // MUDANÇA: Para fins de teste e para MOSTRAR os dados que a usuária pediu,
+        // vamos forçar o calendário a abrir em Novembro de 2025.
+        // Se ela quiser que abra no mês atual, é só comentar esta linha.
+        currentDate = new Date(2025, 10, 1); // 10 = Novembro
+        
+        setInitialMoon(); // Define a lua de HOJE (conforme o new Date())
+        renderCalendar(); // Renderiza o calendário de Novembro 2025
+
+    </script>
+</body>
+</html>
+
