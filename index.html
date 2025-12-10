@@ -3,374 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coven do Corvo | Calendário Lunar</title>
+    <title>Coven do Corvo | Yule & Solstício</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Cormorant+Garamond:ital,wght@0,300;0,500;0,700;1,400&display=swap" rel="stylesheet">
     
     <style>
-        /* --- Base & Atmosfera --- */
+        /* --- Identidade Visual: O Corvo no Inverno --- */
+        :root {
+            --crow-black: #050505;
+            --winter-night: #0f172a;
+            --snow-white: #f1f5f9;
+            --yule-gold: #d4af37;
+            --yule-red: #881337; /* Vermelho sangue seco/vinho */
+            --pine-green: #064e3b;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background-color: #030303; /* Preto Absoluto */
-            color: #e5e5e5;
-            font-family: 'Cormorant Garamond', serif; /* Fonte de corpo mais elegante */
+            background-color: var(--crow-black);
+            color: #cbd5e1;
+            font-family: 'Cormorant Garamond', serif;
             min-height: 100vh;
+            /* Gradiente complexo: Escuridão com toque de aurora boreal sutil */
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(50, 40, 90, 0.15) 0%, transparent 50%),
-                linear-gradient(to bottom, #030303 0%, #0a0a0a 100%);
+                radial-gradient(circle at 50% 10%, rgba(6, 78, 59, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(136, 19, 55, 0.1) 0%, transparent 40%),
+                linear-gradient(to bottom, #020202 0%, #0f172a 100%);
             overflow-x: hidden;
         }
 
-        h1, h2, h3, .font-title {
-            font-family: 'Cinzel', serif;
-            letter-spacing: 0.05em;
-        }
+        h1, h2, .font-title { font-family: 'Cinzel', serif; }
 
-        /* --- O "Grimório" (Container Principal) --- */
-        .grimoire-card {
-            background: linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.98) 100%);
-            border: 1px solid rgba(184, 134, 11, 0.15); /* Dourado escuro sutil */
+        /* --- Neve (CSS Puro - Leve para celular) --- */
+        .snow-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            animation: snow 15s linear infinite;
+            opacity: 0.2;
+        }
+        @keyframes snow { 0% { background-position: 0 0; } 100% { background-position: 50px 200px; } }
+
+        /* --- O Grimório (Card Principal) --- */
+        .grimoire {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             box-shadow: 
-                0 0 0 1px rgba(0,0,0, 0.8), /* Borda interna escura */
-                0 20px 50px -10px rgba(0, 0, 0, 1),
-                inset 0 0 60px rgba(0,0,0,0.8);
+                0 0 0 1px rgba(0,0,0, 0.5),
+                0 25px 50px -12px rgba(0, 0, 0, 0.9),
+                inset 0 0 100px rgba(0,0,0,0.7);
             position: relative;
+            z-index: 10;
         }
 
-        /* Detalhe decorativo no topo (Linha de Ouro) */
-        .grimoire-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 20%;
-            right: 20%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent);
+        /* Decoração de Borda Dourada (Estilo Art Deco Místico) */
+        .grimoire::after {
+            content: ''; position: absolute; inset: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            pointer-events: none;
+            clip-path: polygon(
+                0 0, 20% 0, 25% 5%, 75% 5%, 80% 0, 100% 0, 
+                100% 100%, 80% 100%, 75% 95%, 25% 95%, 20% 100%, 0 100%
+            );
         }
 
-        /* --- Grade do Calendário --- */
+        /* --- Calendário Responsivo --- */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
-            background: rgba(184, 134, 11, 0.1); /* Linhas douradas finas */
-            border: 1px solid rgba(184, 134, 11, 0.1);
+            background: rgba(212, 175, 55, 0.1); /* Linhas douradas fracas */
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .day-cell {
-            background-color: #080808;
-            min-height: 140px;
-            padding: 0.75rem;
+            background-color: rgba(5, 5, 5, 0.7);
+            /* Altura dinâmica: menor no celular */
+            min-height: 80px; 
+            padding: 0.25rem;
             display: flex;
             flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        /* Efeito "Asa de Corvo" no Hover */
+        @media (min-width: 640px) {
+            .day-cell { min-height: 130px; padding: 0.75rem; }
+        }
+
         .day-cell:hover {
-            background-color: #0d0d0d;
-            box-shadow: inset 0 0 20px rgba(25, 25, 50, 0.3); /* Brilho azulado/roxo sutil */
-        }
-        .day-cell:hover .day-number {
-            color: #d4af37; /* Dourado ao passar o mouse */
+            background-color: rgba(20, 30, 40, 0.9);
+            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.05);
         }
 
-        /* Dia de Hoje */
-        .day-cell.today {
-            background: linear-gradient(135deg, rgba(20, 20, 25, 1), rgba(10, 10, 15, 1));
-        }
-        .day-cell.today::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 1px solid rgba(184, 134, 11, 0.4);
-            box-shadow: inset 0 0 15px rgba(184, 134, 11, 0.05);
-            pointer-events: none;
-        }
-
-        .day-cell.other-month {
-            opacity: 0.3;
-            background-color: #030303;
-            pointer-events: none;
-        }
-
-        /* --- Tipografia dos Dias --- */
+        /* Marcadores Especiais */
         .day-number {
             font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: #525252;
-            transition: color 0.3s ease;
         }
-        .today .day-number {
-            color: #e5e5e5;
-            text-shadow: 0 0 10px rgba(229, 229, 229, 0.3);
-        }
+        @media (min-width: 640px) { .day-number { font-size: 1.1rem; } }
 
-        /* --- Lua & Marcadores --- */
-        .moon-icon {
-            font-size: 1.2rem;
-            filter: grayscale(100%) brightness(0.8);
-            transition: all 0.5s ease;
-            opacity: 0.5;
+        .today {
+            background: linear-gradient(to bottom right, rgba(212, 175, 55, 0.1), rgba(0,0,0,0));
+            border-top: 2px solid var(--yule-gold);
         }
-        .day-cell:hover .moon-icon {
-            filter: grayscale(0%) brightness(1.2); /* Revela a cor/brilho no hover */
-            opacity: 1;
-            transform: scale(1.1);
-        }
+        .today .day-number { color: var(--yule-gold); text-shadow: 0 0 8px rgba(212, 175, 55, 0.4); }
 
-        /* Marcadores de Festivais (Minimalistas) */
-        .event-dot {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            margin-right: 4px;
-            display: inline-block;
+        /* Estilo Yule (21-25 Dez) */
+        .yule-period {
+            background: radial-gradient(circle at top right, rgba(136, 19, 55, 0.15), transparent);
         }
-        
-        .festival-text {
-            font-size: 0.7rem;
-            line-height: 1.3;
-            margin-top: 4px;
-            color: #888;
-            font-weight: 300;
-            letter-spacing: 0.02em;
+        .yule-period .day-number { color: #fca5a5; }
+
+        /* Eventos */
+        .event-tag {
+            font-size: 0.6rem;
+            margin-top: auto;
+            padding: 2px 4px;
+            border-radius: 2px;
+            line-height: 1.1;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
+            width: 100%;
+            text-align: center;
+        }
+        @media (min-width: 640px) { 
+            .event-tag { text-align: left; background: transparent; padding: 0; margin-top: 4px; }
         }
 
-        /* Cores Temáticas Refinadas */
-        .text-deipnon { color: #9f7aea; } /* Roxo místico */
-        .dot-deipnon { background-color: #9f7aea; box-shadow: 0 0 6px rgba(159, 122, 234, 0.4); }
-        
-        .text-noumenia { color: #93c5fd; } /* Azul etéreo */
-        .dot-noumenia { background-color: #93c5fd; box-shadow: 0 0 6px rgba(147, 197, 253, 0.4); }
-        
-        .text-fullmoon { color: #d4af37; } /* Dourado real */
-        .dot-fullmoon { background-color: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.5); }
+        /* Cores dos Eventos */
+        .evt-moon { color: #94a3b8; }
+        .evt-yule { color: #fbbf24; font-weight: bold; text-shadow: 0 0 5px rgba(251, 191, 36, 0.3); }
+        .evt-dark { color: #a78bfa; }
 
-        .text-festival { color: #a3a3a3; }
-        
-        /* Botões de Navegação */
+        /* Botões Navegação */
         .nav-btn {
-            color: #666;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             transition: all 0.3s;
-            border: 1px solid transparent;
         }
         .nav-btn:hover {
-            color: #d4af37;
-            transform: translateY(-1px);
-        }
-
-        /* Efeito de Vidro Fosco para o Header */
-        .glass-header {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            border-color: var(--yule-gold);
+            color: var(--yule-gold);
+            background: rgba(212, 175, 55, 0.05);
         }
 
     </style>
 </head>
-<body class="flex flex-col items-center py-8 sm:py-12 px-2">
+<body class="flex flex-col items-center justify-center py-4 sm:py-10 px-2 sm:px-4">
 
-    <main class="w-full max-w-5xl grimoire-card rounded-sm p-1 sm:p-2 shadow-2xl">
+    <div class="snow-bg"></div>
+
+    <main class="w-full max-w-5xl grimoire rounded-md shadow-2xl overflow-hidden">
         
-        <div class="border border-white/5 p-4 sm:p-8 rounded-sm h-full">
-
-            <header class="mb-10 text-center relative">
-                
-                <div class="text-3xl mb-2 text-gray-600 opacity-50">✦</div>
-                
-                <h1 class="text-4xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-gray-200 via-gray-100 to-gray-400 font-bold mb-2 uppercase tracking-widest drop-shadow-md">
+        <header class="relative p-6 sm:p-10 text-center border-b border-white/5">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent opacity-50"></div>
+            
+            <div class="flex flex-col items-center justify-center gap-2">
+                <span class="text-3xl sm:text-4xl text-gray-600 opacity-40 animate-pulse">✦</span>
+                <h1 class="text-3xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-[#e2e8f0] to-[#94a3b8] font-bold uppercase tracking-[0.15em] drop-shadow-md">
                     Coven do Corvo
                 </h1>
-                <div class="w-24 h-[1px] bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mb-4 opacity-70"></div>
-                <p class="text-[#888] text-sm tracking-[0.3em] uppercase font-light">Calendário Ritualístico</p>
-
-                <div class="mt-6 md:mt-0 md:absolute md:right-0 md:top-2 flex flex-col items-center md:items-end group">
-                    <div id="current-moon-emoji-lg" class="text-3xl text-gray-400 group-hover:text-[#d4af37] transition-colors duration-500 cursor-default">🌑</div>
-                    <span class="text-[0.6rem] uppercase tracking-widest text-gray-600 mt-1">Fase Atual</span>
-                    <span id="current-moon-name" class="text-sm text-gray-300 font-cinzel">Lua Nova</span>
+                <div class="flex items-center gap-3 opacity-60">
+                    <div class="h-[1px] w-8 bg-[#d4af37]"></div>
+                    <span class="text-[#d4af37] text-xs tracking-[0.3em] uppercase">Grimório de Yule</span>
+                    <div class="h-[1px] w-8 bg-[#d4af37]"></div>
                 </div>
-            </header>
-
-            <div class="flex justify-between items-end mb-6 px-2">
-                <button id="prev-month" class="nav-btn font-cinzel text-sm uppercase tracking-wider hover:text-[#d4af37] flex items-center gap-2">
-                    <span>&larr;</span> Anterior
-                </button>
-                
-                <h2 id="month-year" class="text-2xl sm:text-3xl text-[#d4af37] font-medium text-center uppercase tracking-wide">
-                    </h2>
-                
-                <button id="next-month" class="nav-btn font-cinzel text-sm uppercase tracking-wider hover:text-[#d4af37] flex items-center gap-2">
-                    Próximo <span>&rarr;</span>
-                </button>
             </div>
 
-            <div class="grid grid-cols-7 gap-1 mb-4 border-b border-white/5 pb-2">
-                <div class="text-center text-[#555] font-cinzel text-xs uppercase tracking-widest">Dom</div>
-                <div class="text-center text-[#736598] font-cinzel text-xs uppercase tracking-widest font-semibold" title="Dia de Hekate">Seg</div>
-                <div class="text-center text-[#555] font-cinzel text-xs uppercase tracking-widest">Ter</div>
-                <div class="text-center text-[#555] font-cinzel text-xs uppercase tracking-widest">Qua</div>
-                <div class="text-center text-[#555] font-cinzel text-xs uppercase tracking-widest">Qui</div>
-                <div class="text-center text-[#555] font-cinzel text-xs uppercase tracking-widest">Sex</div>
-                <div class="text-center text-[#736598] font-cinzel text-xs uppercase tracking-widest font-semibold" title="Dia de Hekate">Sáb</div>
+            <div class="mt-6 sm:mt-0 sm:absolute sm:right-8 sm:top-8 flex flex-col items-center sm:items-end">
+                <div id="moon-display" class="text-2xl sm:text-3xl grayscale hover:grayscale-0 transition-all duration-700 cursor-help" title="Fase Atual">🌕</div>
+                <span id="moon-text" class="text-[0.6rem] uppercase tracking-widest text-gray-500 mt-1">Lua Cheia</span>
             </div>
+        </header>
 
-            <div id="calendar-grid" class="calendar-grid rounded-sm overflow-hidden">
-                </div>
-
-            <footer class="mt-8 flex flex-wrap justify-center gap-8 text-xs text-gray-500 font-light border-t border-white/5 pt-6 uppercase tracking-wider">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#9f7aea] shadow-[0_0_5px_#9f7aea]"></span> Deipnon
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#93c5fd] shadow-[0_0_5px_#93c5fd]"></span> Noumenia
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#d4af37] shadow-[0_0_5px_#d4af37]"></span> Lua Cheia
-                </div>
-            </footer>
-
+        <div class="flex justify-between items-center p-4 sm:px-8">
+            <button id="prev-month" class="nav-btn text-xs sm:text-sm uppercase tracking-wider font-cinzel">
+                &larr; <span class="hidden sm:inline">Anterior</span>
+            </button>
+            
+            <h2 id="month-year" class="text-xl sm:text-3xl text-[#d4af37] font-medium uppercase tracking-wide">
+                </h2>
+            
+            <button id="next-month" class="nav-btn text-xs sm:text-sm uppercase tracking-wider font-cinzel">
+                <span class="hidden sm:inline">Próximo</span> &rarr;
+            </button>
         </div>
+
+        <div class="grid grid-cols-7 gap-0 border-y border-white/5 bg-black/20">
+            <div class="py-2 text-center text-gray-600 font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest">Dom</div>
+            <div class="py-2 text-center text-[#a78bfa] font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest font-bold bg-white/5">Seg</div>
+            <div class="py-2 text-center text-gray-600 font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest">Ter</div>
+            <div class="py-2 text-center text-gray-600 font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest">Qua</div>
+            <div class="py-2 text-center text-gray-600 font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest">Qui</div>
+            <div class="py-2 text-center text-gray-600 font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest">Sex</div>
+            <div class="py-2 text-center text-[#a78bfa] font-cinzel text-[0.6rem] sm:text-xs uppercase tracking-widest font-bold bg-white/5">Sáb</div>
+        </div>
+
+        <div id="calendar-grid" class="calendar-grid bg-black/40">
+            </div>
+
+        <footer class="p-4 sm:p-6 border-t border-white/5 bg-black/20 text-center">
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-8 text-[0.65rem] sm:text-xs text-gray-500 font-light uppercase tracking-wider">
+                <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></span> Yule/Sabbats</span>
+                <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#a78bfa]"></span> Hekate/Deipnon</span>
+                <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#e2e8f0]"></span> Luas Cheias</span>
+            </div>
+            <p class="mt-4 text-[0.6rem] text-gray-700 italic font-serif opacity-50">
+                "Onde a sombra do corvo pousa, o inverno guarda segredos."
+            </p>
+        </footer>
+
     </main>
 
     <script>
-        // --- LÓGICA DO COVEN ---
-
+        // --- LÓGICA DO GRIMÓRIO ---
+        
         let currentDate = new Date();
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0,0,0,0);
 
-        const calendarGrid = document.getElementById('calendar-grid');
-        const monthYearHeader = document.getElementById('month-year');
-        const prevButton = document.getElementById('prev-month');
-        const nextButton = document.getElementById('next-month');
-        const currentMoonEmojiDisplay = document.getElementById('current-moon-emoji-lg');
-        const currentMoonNameDisplay = document.getElementById('current-moon-name');
+        const els = {
+            grid: document.getElementById('calendar-grid'),
+            title: document.getElementById('month-year'),
+            moonIcon: document.getElementById('moon-display'),
+            moonName: document.getElementById('moon-text')
+        };
 
-        const MOON_EMOJI = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
-        const MOON_NAMES = [
-            'Lua Nova', 'Crescente', 'Quarto Cresc.', 'Gibosa Cresc.', 
-            'Lua Cheia', 'Gibosa Ming.', 'Quarto Ming.', 'Minguante'
-        ];
+        const MOON_PHASES = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+        const MOON_LABELS = ['Nova', 'Crescente', 'Quarto C.', 'Gibosa C.', 'Cheia', 'Gibosa M.', 'Quarto M.', 'Minguante'];
 
-        // Cálculo de Fase da Lua (Simplificado)
         function getMoonPhase(date) {
-            const knownNewMoon = new Date(2000, 0, 6); 
+            const knownNewMoon = new Date(2000, 0, 6);
             const synodic = 29.53058867;
-            const diffTime = date.getTime() - knownNewMoon.getTime();
-            const diffDays = diffTime / (86400000);
-            const cycle = diffDays % synodic;
-            const phase = Math.floor((cycle / synodic) * 8);
+            const diff = (date.getTime() - knownNewMoon.getTime()) / 86400000;
+            const phase = Math.floor((diff % synodic / synodic) * 8);
             return (phase >= 0 && phase <= 7) ? phase : 0;
         }
 
-        // Eventos do Coven (Dezembro 2025)
-        function getEvents(date) {
-            const d = date.getDate();
-            const m = date.getMonth();
-            const y = date.getFullYear();
-            const events = [];
+        // Lógica de Eventos (Foco em Yule & Dezembro)
+        function getEvents(d, m, y) {
+            let events = [];
+            // Eventos Lunares
+            const phase = getMoonPhase(new Date(y, m, d));
+            if (phase === 4) events.push({ t: "Lua Cheia", c: "evt-moon" });
+            if (phase === 0) events.push({ t: "Lua Nova", c: "evt-dark" });
 
-            if (y === 2025 && m === 11) { // Dezembro
-                if (d === 5) events.push({ name: "Lua Cheia", type: "fullmoon" });
-                if (d === 19) events.push({ name: "Deipnon", type: "deipnon" });
-                if (d === 20) events.push({ name: "Noumenia", type: "noumenia" });
-                if (d === 21) events.push({ name: "Yule / Solstício", type: "gold" });
-                if (d === 25) events.push({ name: "Haloa", type: "normal" });
+            // Datas Fixas (Exemplo Dezembro)
+            if (m === 11) { // Dezembro
+                if (d === 5) events.push({ t: "Lua Fria", c: "evt-moon" });
+                if (d === 19) events.push({ t: "Deipnon", c: "evt-dark" });
+                if (d === 20) events.push({ t: "Noumenia", c: "evt-moon" });
+                if (d === 21) events.push({ t: "★ YULE", c: "evt-yule" }); // Solstício
+                if (d === 25) events.push({ t: "Natal / Sol Invictus", c: "evt-yule" });
+                if (d === 31) events.push({ t: "Fim de Ciclo", c: "evt-moon" });
             }
-            // Retrocompatibilidade Novembro
-            if (y === 2025 && m === 10) {
-                if (d === 5) events.push({ name: "Lua Cheia", type: "fullmoon" });
-                if (d === 21) events.push({ name: "Deipnon", type: "deipnon" });
-                if (d === 22) events.push({ name: "Noumenia", type: "noumenia" });
-            }
-
             return events;
         }
 
         function render() {
-            calendarGrid.innerHTML = '';
+            els.grid.innerHTML = '';
             const y = currentDate.getFullYear();
             const m = currentDate.getMonth();
+            
+            // Atualiza Título
+            els.title.innerText = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
 
-            // Título
-            const mName = currentDate.toLocaleString('pt-BR', { month: 'long' });
-            monthYearHeader.innerText = `${mName} ${y}`;
-
-            // Datas
+            // Dias
             const firstDay = new Date(y, m, 1);
-            const lastDay = new Date(y, m + 1, 0);
             const startDow = firstDay.getDay();
-            const prevLast = new Date(y, m, 0).getDate();
-
+            const lastDate = new Date(y, m + 1, 0).getDate();
+            
+            // Loop de 42 células (6 linhas x 7 colunas) para grade consistente
             for (let i = 0; i < 42; i++) {
                 const cell = document.createElement('div');
-                cell.className = 'day-cell group';
-
-                let dNum, dObj, isOther = false;
-
-                if (i < startDow) {
-                    dNum = prevLast - startDow + 1 + i;
-                    dObj = new Date(y, m - 1, dNum);
-                    isOther = true;
-                    cell.classList.add('other-month');
-                } else if (i >= startDow + lastDay.getDate()) {
-                    dNum = i - startDow - lastDay.getDate() + 1;
-                    dObj = new Date(y, m + 1, dNum);
-                    isOther = true;
-                    cell.classList.add('other-month');
-                } else {
-                    dNum = i - startDow + 1;
-                    dObj = new Date(y, m, dNum);
+                const dNum = i - startDow + 1;
+                const isCurrentMonth = dNum > 0 && dNum <= lastDate;
+                
+                let dateObj = new Date(y, m, dNum);
+                if (!isCurrentMonth) {
+                    // Ajuste para datas de outros meses
+                    dateObj = new Date(y, m, dNum); 
                 }
-                dObj.setHours(0,0,0,0);
+                
+                // Estilização Básica
+                cell.className = `day-cell group ${!isCurrentMonth ? 'opacity-20 pointer-events-none' : ''}`;
+                
+                if (isCurrentMonth) {
+                    // Destaque Dia Atual
+                    if (dateObj.getTime() === today.getTime()) {
+                        cell.classList.add('today');
+                        // Atualiza widget de lua
+                        const p = getMoonPhase(today);
+                        els.moonIcon.innerText = MOON_PHASES[p];
+                        els.moonName.innerText = MOON_LABELS[p];
+                    }
 
-                const phase = getMoonPhase(dObj);
-                const evs = getEvents(dObj);
+                    // Destaque Yule (21-25)
+                    if (m === 11 && dNum >= 21 && dNum <= 25) {
+                        cell.classList.add('yule-period');
+                    }
 
-                // HTML da Célula
-                let html = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="day-number">${dNum}</span>
-                        <span class="moon-icon" title="${MOON_NAMES[phase]}">${MOON_EMOJI[phase]}</span>
-                    </div>
-                `;
-
-                evs.forEach(ev => {
-                    let colorClass = "text-festival"; // Padrão
-                    let dotClass = "bg-gray-600";
+                    // Conteúdo
+                    const evs = getEvents(dNum, m, y);
+                    const phase = getMoonPhase(dateObj);
                     
-                    if (ev.type === 'deipnon') { colorClass = "text-deipnon"; dotClass = "dot-deipnon"; }
-                    if (ev.type === 'noumenia') { colorClass = "text-noumenia"; dotClass = "dot-noumenia"; }
-                    if (ev.type === 'fullmoon') { colorClass = "text-fullmoon"; dotClass = "dot-fullmoon"; }
-                    if (ev.type === 'gold') { colorClass = "text-[#d4af37] font-semibold"; dotClass = "bg-[#d4af37]"; }
-
-                    html += `
-                        <div class="festival-text ${colorClass} truncate">
-                            ${ev.type !== 'normal' ? `<span class="event-dot ${dotClass}"></span>` : ''}
-                            ${ev.name}
+                    let html = `
+                        <div class="flex justify-between items-start w-full">
+                            <span class="day-number">${dNum}</span>
+                            <span class="text-[0.7rem] opacity-40 group-hover:opacity-100 transition-opacity" title="${MOON_LABELS[phase]}">${MOON_PHASES[phase]}</span>
                         </div>
+                        <div class="flex flex-col gap-1 mt-auto w-full">
                     `;
-                });
-
-                cell.innerHTML = html;
-
-                if (dObj.getTime() === today.getTime()) {
-                    cell.classList.add('today');
-                    currentMoonEmojiDisplay.innerText = MOON_EMOJI[phase];
-                    currentMoonNameDisplay.innerText = MOON_NAMES[phase];
+                    
+                    evs.forEach(ev => {
+                        html += `<div class="event-tag ${ev.c} truncate">${ev.t}</div>`;
+                    });
+                    
+                    html += `</div>`;
+                    cell.innerHTML = html;
                 }
 
-                calendarGrid.appendChild(cell);
+                els.grid.appendChild(cell);
             }
         }
 
-        prevButton.onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); render(); };
-        nextButton.onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); render(); };
+        document.getElementById('prev-month').onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); render(); };
+        document.getElementById('next-month').onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); render(); };
 
         render();
     </script>
